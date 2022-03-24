@@ -12,27 +12,30 @@
 	FROM NashvilleHousing
 
 -- ADDRESS NULLS IN PropertyAddress
+	--Select NULLS in PropertyAddress
 	SELECT *
 	FROM NVHouseExploration..NashvilleHousing
 	WHERE PropertyAddress IS NULL
-	--We have found there are NULL PropertyAddress rows, and need a strategy to input addresses if possible
+		--There are NULL PropertyAddress rows, and need a strategy to input addresses if possible
 
 	--Exploration of related data
 	SELECT *
 	FROM NVHouseExploration..NashvilleHousing
 	ORDER BY ParcelID
-	--We have found that there is a many-to-1 relationship of ParcelIDs to PropertyAddress, so we can we update NULL PropertyAddress rows that have a corresponding ParcelID with a Non-NULL PropertyAddress rows
+		--Found that there is a many-to-1 relationship of ParcelIDs to PropertyAddress
+		--Now can update NULL PropertyAddress rows that have a corresponding ParcelID with a Non-NULL PropertyAddress rows
 
-	--The following query joins the table on itself, in order to find NULL PropertyAdresss rows by Parcel ID, and match to another existing PropertyAddress based on ParcelID match, and unique UniqueIDs
-	--The ISNULL function shows a successful input of Property Address from an existing matched ParcelID to a NULL PropertyAddress row
+	--Find NULL PropertyAddress fields and what the data the field should have based on ParcelID 
 	SELECT a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.PropertyAddress,b.PropertyAddress)
 	FROM NVHouseExploration..NashvilleHousing a
 	JOIN NVHouseExploration..NashvilleHousing b
 		ON a.ParcelID = b.ParcelID
 		AND a.UniqueID <> b.UniqueID
 	WHERE a.PropertyAddress IS NULL
+		--The query joins the table on itself, in order to find NULL PropertyAdresss rows by Parcel ID
+		--The ISNULL function shows a successful match of Property Address from an existing matched ParcelID to a NULL PropertyAddress row
 
-	--use UPDATE to actually change the PropertyAddress row values inline
+	--Use UPDATE to actually change the PropertyAddress row values inline
 	UPDATE a
 	SET PropertyAddress = ISNULL(a.PropertyAddress,b.PropertyAddress)
 	FROM NVHouseExploration..NashvilleHousing a
